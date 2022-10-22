@@ -1,0 +1,10 @@
+const express = require('express')
+const app = express()
+app.use(express.json())
+const DatabaseConnection = require('./Connection/database')
+const AdminRoutes = require('./Routes/admin.route')
+DatabaseConnection.connect()
+app.use("/hotel/admin", AdminRoutes)
+app.listen(9000)
+console.log("we on http://localhost:9000")
+module.exports = app
