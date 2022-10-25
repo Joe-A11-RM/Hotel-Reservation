@@ -5,7 +5,7 @@ const room = mongoose.Schema({
             required: true
     },
     roomnumber: {
-        type: Number,
+        type: String,
         required: true
     },
     capacity: {

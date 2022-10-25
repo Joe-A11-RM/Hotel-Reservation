@@ -9,6 +9,6 @@ router.get('/logout/:id', AdminAuth, AdminController.Logout)
 router.post('/addroom', /*upload.fields([{ name: 'file', maxCount: 2 }])*/ upload.array('file'), AdminController.AddRoom)
 router.delete('/deleteroom/:id', AdminController.DeleteRoom)
 router.put('/updateroom/:id', AdminController.EditRoomInf)
-router.get('/updateroomimage/:id', AdminController.EditRoomImage)
+router.get('/updateroomimage/:id/:filename', AdminController.EditRoomImage)
 
 module.exports = router
