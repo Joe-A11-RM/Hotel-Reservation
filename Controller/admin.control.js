@@ -70,9 +70,9 @@ class AdminControl {
             })
             for (let image = 0; image < req.files.length; image++) {
                 await roomdetails.fileImages.push({ fileImage: req.files[image] })
-                console.log(image)
+                    //console.log(image)
             }
-            console.log(req.files)
+            //console.log(req.files)
             await roomdetails.save()
             res.send(roomdetails)
         } catch (error) {
@@ -117,6 +117,7 @@ class AdminControl {
             })
         }
     }
+
     static EditRoomImage = async(req, res) => {
         try {
             let roomimage = await roommodel.findById({
@@ -125,15 +126,14 @@ class AdminControl {
             if (roomimage) {
                 for (let filename of roomimage.fileImages) {
                     console.log(filename.fileImage.filename)
-                    if (filename.fileImage.filename == req.body.filename) {
+                    if (filename.fileImage.filename == req.params.filename) {
                         console.log("Done Condition")
-                        console.log(req.body.filename)
+                        console.log(req.params.filename)
                         console.log(filename.fileImage.filename)
                         let index = roomimage.fileImages.indexOf(filename)
                         console.log(index)
-                        await roomimage.fileImages.pop(index)
+                        await roomimage.fileImages.splice(index, 1)
                         await roomimage.fileImages.push({ fileImage: req.body })
-
                     }
                 }
             }
@@ -146,5 +146,7 @@ class AdminControl {
             })
         }
     }
+
+
 }
 module.exports = AdminControl
