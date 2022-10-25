@@ -23,19 +23,19 @@ const room = mongoose.Schema({
     },
     fileImages: [{
         fileImage: {
-            fileName: {
+            filename: {
                 type: String,
                 required: true
             },
-            filePath: {
+            path: {
                 type: String,
                 required: true
             },
-            fileType: {
+            mimetype: {
                 type: String,
                 required: true
             }
-        }
+        },
     }]
 })
 module.exports = mongoose.model("Room", room)
