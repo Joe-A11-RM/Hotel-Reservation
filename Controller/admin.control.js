@@ -66,9 +66,12 @@ class AdminControl {
                 class: req.body.class,
                 roomnumber: req.body.roomnumber,
                 capacity: req.body.capacity,
-                description: req.body.description,
+                description: req.body.description
             })
-            roomdetails.fileImages.push({ fileImage: req.files })
+            for (let image = 0; image < req.files.length; image++) {
+                await roomdetails.fileImages.push({ fileImage: req.files[image] })
+                console.log(image)
+            }
             console.log(req.files)
             await roomdetails.save()
             res.send(roomdetails)
@@ -78,7 +81,70 @@ class AdminControl {
                 message: error.message
             })
         }
+    }
 
+    static DeleteRoom = async(req, res) => {
+        try {
+            let deletedroom = await roommodel.findByIdAndDelete({
+                _id: req.params.id
+            })
+            res.send(deletedroom)
+        } catch (error) {
+            res.send({
+                apiStatus: false,
+                message: error.message
+            })
+        }
+
+    }
+
+    static EditRoomInf = async(req, res) => {
+        try {
+            let roominf = await roommodel.findByIdAndUpdate({
+                _id: req.params.id
+            }, {
+                class: req.body.class,
+                roomnumber: req.body.roomnumber,
+                capacity: req.body.capacity,
+                description: req.body.description
+            })
+            await roominf.save()
+            res.send(roominf)
+        } catch (error) {
+            res.send({
+                apiStatus: false,
+                message: error.message
+            })
+        }
+    }
+    static EditRoomImage = async(req, res) => {
+        try {
+            let roomimage = await roommodel.findById({
+                _id: req.params.id
+            })
+            if (roomimage) {
+                for (let filename of roomimage.fileImages) {
+                    console.log(filename.fileImage.filename)
+                    if (filename.fileImage.filename == req.body.filename) {
+                        console.log("Done Condition")
+                        console.log(req.body.filename)
+                        console.log(filename.fileImage.filename)
+                        let index = roomimage.fileImages.indexOf(filename)
+                        console.log(index)
+                        await roomimage.fileImages.pop(index)
+                        await roomimage.fileImages.push({ fileImage: req.body })
+
+                    }
+                }
+            }
+            roomimage.save()
+            res.send(roomimage)
+        } catch (error) {
+            res.send({
+                apiStatus: false,
+                message: error.message
+            })
+        }
     }
 }
 module.exports = AdminControl
