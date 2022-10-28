@@ -16,11 +16,13 @@ const room = mongoose.Schema({
         type: String,
         required: true
     },
-    status: {
-        type: String,
-        enum: ["Available", "Not Available"],
-        default: "Available"
+    price: {
+        type: Number,
+        required: true
     },
+    status: [{
+        type: String
+    }],
     fileImages: [{
         fileImage: {
             filename: {

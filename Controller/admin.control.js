@@ -66,7 +66,8 @@ class AdminControl {
                 class: req.body.class,
                 roomnumber: req.body.roomnumber,
                 capacity: req.body.capacity,
-                description: req.body.description
+                description: req.body.description,
+                price: req.body.price
             })
             for (let image = 0; image < req.files.length; image++) {
                 await roomdetails.fileImages.push({ fileImage: req.files[image] })
