@@ -10,5 +10,6 @@ router.get('/deleteaccount/:id', UserController.RemoveAccount)
 router.get('/showrooms', UserController.ShowRooms)
 router.post('/bookroom', UserAuth, UserController.BookRoom)
 router.get('/showbookedroom', UserAuth, UserController.ShowBookedRooms)
+router.get('/cancelroom/:id', UserAuth, UserController.CancelBookedRoom)
 
 module.exports = router

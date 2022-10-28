@@ -170,30 +170,27 @@ class UserControl {
                     _id: req.body.roomid
                 })
                 if (roomstatus) {
-                    console.log("Done")
-                }
-                finduser.roomsid.push({
-                    roomid: req.body.id,
-                    startDate: req.body.startDate,
-                    endDate: req.body.endDate
-                })
-                await finduser.populate({ path: "roomsid.roomid", strictPopulate: false })
-                console.log(req.body)
-                for (let room of finduser.roomsid) {
-                    const diffTime = Math.abs(room.endDate - room.startDate);
-                    room.nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    const date = new Date(room.startDate)
-                    for (let i = 1; i <= room.nights; i++) {
-                        for (let room of roomstatus.status) {
-                            if (room == date.addDays(i)) {
-                                throw new Error("Not Available")
+                    finduser.roomsid.push({
+                        roomid: req.body.roomid,
+                        startDate: req.body.startDate,
+                        endDate: req.body.endDate
+                    })
+                    await finduser.populate({ path: "roomsid.roomid", strictPopulate: false })
+                    for (let room of finduser.roomsid) {
+                        const diffTime = Math.abs(room.endDate - room.startDate);
+                        room.nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        const date = new Date(room.startDate)
+                        for (let i = 1; i <= room.nights; i++) {
+                            for (let room of roomstatus.status) {
+                                if (room == date.addDays(i)) {
+                                    throw new Error("Not Available")
+                                }
                             }
+                            roomstatus.status.push(date.addDays(i))
                         }
-                        roomstatus.status.push(date.addDays(i))
+                        finduser.totalprice = await Calculate(finduser)
                     }
                 }
-
-                finduser.totalprice = await Calculate(finduser)
                 await finduser.save()
                 await roomstatus.save()
                 res.send(finduser)
@@ -211,6 +208,33 @@ class UserControl {
                 userid: req.user._id
             })
             res.send(show)
+        } catch (error) {
+            res.send({
+                apiStatus: false,
+                message: error.message
+            })
+        }
+    }
+    static CancelBookedRoom = async(req, res) => {
+        try {
+            let finduser = await bookroommodel.findOne({
+                userid: req.user._id
+            })
+            if (finduser) {
+                for (let room of finduser.roomsid) {
+                    console.log(room.roomid)
+                    console.log(req.params.id)
+                    if (room.roomid == req.params.id) {
+                        console.log("Done")
+                        let index = finduser.roomsid.indexOf(room)
+                        console.log(index)
+                        await finduser.roomsid.splice(index, 1)
+                        finduser.totalprice = await Calculate(finduser)
+                    }
+                }
+            }
+            await finduser.save()
+            res.send(finduser)
         } catch (error) {
             res.send({
                 apiStatus: false,
