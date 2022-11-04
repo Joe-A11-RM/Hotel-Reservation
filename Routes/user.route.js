@@ -11,5 +11,8 @@ router.get('/showrooms', UserController.ShowRooms)
 router.post('/bookroom', UserAuth, UserController.BookRoom)
 router.get('/showbookedroom', UserAuth, UserController.ShowBookedRooms)
 router.get('/cancelroom/:id', UserAuth, UserController.CancelBookedRoom)
+router.get('/filterprice', UserController.FilterPrices)
+router.get('/filterclass', UserController.FilterClasses)
+router.get('/filtercapacity', UserController.FilterCapacity)
 
 module.exports = router

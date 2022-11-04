@@ -2,12 +2,12 @@ const usermodel = require('../Models/user.model')
 const roommodel = require('../Models/room.model')
 const bookroommodel = require('../Models/bookedroom.model')
 const bcrypt = require('bcrypt')
-const date = new Date();
+const moment = require('moment')
 let Calculate = async(hotel) => {
     var subtotal = 0
     for (let room of hotel.roomsid) {
         const diffTime = Math.abs(room.endDate - room.startDate);
-        room.nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        room.nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24) + 1);
         console.log(room.roomid.price)
         subtotal = subtotal + (room.roomid.price * room.nights)
 
@@ -147,7 +147,7 @@ class UserControl {
                     const diffTime = Math.abs(room.endDate - room.startDate);
                     room.nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     const date = new Date(room.startDate)
-                    for (let i = 1; i <= room.nights; i++) {
+                    for (let i = 0; i < room.nights; i++) {
                         for (let room of roomstatus.status) {
                             if (room == date.addDays(i)) {
                                 throw new Error("Not Available")
@@ -156,6 +156,8 @@ class UserControl {
                         roomstatus.status.push(date.addDays(i))
                     }
                 }
+                let k = new Date(bookroom.roomsid[0].startDate)
+                bookroom.roomsid[0].startDate = k.addDays(1)
                 bookroom.totalprice = await Calculate(bookroom)
                 await bookroom.save()
                 await roomstatus.save()
@@ -177,18 +179,23 @@ class UserControl {
                     })
                     await finduser.populate({ path: "roomsid.roomid", strictPopulate: false })
                     for (let room of finduser.roomsid) {
-                        const diffTime = Math.abs(room.endDate - room.startDate);
-                        room.nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                        const date = new Date(room.startDate)
-                        for (let i = 1; i <= room.nights; i++) {
-                            for (let room of roomstatus.status) {
-                                if (room == date.addDays(i)) {
-                                    throw new Error("Not Available")
+                        if (room.roomid._id == req.body.roomid) {
+                            const diffTime = Math.abs(room.endDate - room.startDate);
+                            room.nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            const date = new Date(room.startDate)
+                            for (let i = 0; i < room.nights; i++) {
+                                for (let j of roomstatus.status) {
+                                    if (j == date.addDays(i)) {
+                                        throw new Error("Not Available")
+                                    }
                                 }
+                                roomstatus.status.push(date.addDays(i))
+
                             }
-                            roomstatus.status.push(date.addDays(i))
+                            finduser.totalprice = await Calculate(finduser)
+                            let k = new Date(room.startDate)
+                            room.startDate = k.addDays(1)
                         }
-                        finduser.totalprice = await Calculate(finduser)
                     }
                 }
                 await finduser.save()
@@ -220,25 +227,77 @@ class UserControl {
             let finduser = await bookroommodel.findOne({
                 userid: req.user._id
             })
+            console.log(finduser)
+            let findroom = await roommodel.findOne({
+                _id: req.params.id
+            })
             if (finduser) {
+                let indexDate = 0
                 for (let room of finduser.roomsid) {
-                    console.log(room.roomid)
-                    console.log(req.params.id)
                     if (room.roomid == req.params.id) {
-                        console.log("Done")
+                        let x = room.startDate.toUTCString()
+                            //console.log(moment(x).format('L'))
+                        for (let roomdate of findroom.status) {
+                            console.log(moment(roomdate).format('L'))
+                            if (await (moment(x).format('L') == moment(roomdate).format('L'))) {
+                                //console.log(indexDate)
+                                //console.log(room.nights)
+                                await findroom.status.splice(indexDate - 1, room.nights)
+                                await findroom.save()
+                            }
+                            indexDate++
+                        }
                         let index = finduser.roomsid.indexOf(room)
-                        console.log(index)
                         await finduser.roomsid.splice(index, 1)
                         finduser.totalprice = await Calculate(finduser)
                     }
                 }
             }
+
             await finduser.save()
             res.send(finduser)
         } catch (error) {
             res.send({
                 apiStatus: false,
                 message: error.message
+            })
+        }
+    }
+
+    static FilterPrices = async(req, res) => {
+        try {
+            let filter = await roommodel.find()
+                .where('filter.price').gt(req.body.min).lt(req.body.max)
+            res.send(filter)
+        } catch (error) {
+            res.send({
+                apiStatus: false,
+                message: error.message
+            })
+        }
+    }
+
+    static FilterClasses = async(req, res) => {
+        try {
+            let filter = await roommodel.find()
+                .where('filter.class').equals(req.body.class)
+            res.send(filter)
+        } catch (error) {
+            res.send({
+                apiStatus: false,
+                message: error.message
+            })
+        }
+    }
+
+    static FilterCapacity = async(req, res) => {
+        try {
+            let filter = await roommodel.find()
+                .where('filter.capacity').equals(req.body.capacity)
+            res.send(filter)
+        } catch (error) {
+            res.send({
+                apiStatus
             })
         }
     }
