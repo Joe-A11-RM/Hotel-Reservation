@@ -10,5 +10,9 @@ router.post('/addroom', /*upload.fields([{ name: 'file', maxCount: 2 }])*/ uploa
 router.delete('/deleteroom/:id', AdminController.DeleteRoom)
 router.put('/updateroom/:id', AdminController.EditRoomInf)
 router.get('/updateroomimage/:id/:filename', AdminController.EditRoomImage)
-
+router.get('/allusers', AdminController.ShowUsers)
+router.get('/deleteusers/:id', AdminController.DeleteUser)
+router.post('/edituser/:id', AdminController.EditUser)
+router.put('/editbookedroom', AdminController.EditBookedRoom)
+router.delete('/deletebookedroom/:id', AdminController.DeleteBookedRoom)
 module.exports = router

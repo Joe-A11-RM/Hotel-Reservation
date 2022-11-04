@@ -7,7 +7,7 @@ let Calculate = async(hotel) => {
     var subtotal = 0
     for (let room of hotel.roomsid) {
         const diffTime = Math.abs(room.endDate - room.startDate);
-        room.nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24) + 1);
+        room.nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         console.log(room.roomid.price)
         subtotal = subtotal + (room.roomid.price * room.nights)
 
